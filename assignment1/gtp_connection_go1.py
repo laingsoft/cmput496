@@ -3,6 +3,8 @@ Module for playing games of Go using GoTextProtocol
 
 This code is based off of the gtp module in the Deep-Go project
 by Isaac Henrion and Aamos Storkey at the University of Edinburgh.
+
+Extended for CMPUT496 Assignment 1
 """
 import traceback
 import sys
@@ -29,12 +31,16 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         """
         gtp_connection.GtpConnection.__init__(self, go_engine, board, outfile, debug_mode)
         self.commands["hello"] = self.hello_cmd
-        self.commands["score"] = self.score
+        
+        self.commands["score"] = self.score_cmd
     
 
     def hello_cmd(self, args):
         """ Dummy Hello Command """
         self.respond("Hello! " + self.go_engine.name)
+        
+    def score_cmd(self, args):
+        self.respond("score")
 
-    def score(self, args):
-        print(args)
+    def floodfill(self, args):
+        self.respond()
