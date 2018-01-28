@@ -40,7 +40,24 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         self.respond("Hello! " + self.go_engine.name)
         
     def score_cmd(self, args):
-        self.respond("score")
+        board = self.board.get_twoD_board()
+
+        #First we count the number of stones
+        scores = {1:0, 2:0, 0:0}
+        for row in board:
+            for position in row:
+                scores[position] +=1
+
+        #Next we look at all of the open positions
+        #And try to see which territory they are
+
+        # Create some iterators
+        i, j = 0,0
+        
+
+        
+            
+        self.respond(self.board._flood_fill((0,0)))
 
     def floodfill(self, args):
         self.respond()
