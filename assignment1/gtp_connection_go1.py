@@ -39,6 +39,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         """ Dummy Hello Command """
         self.respond("Hello! " + self.go_engine.name)
         
+        
     def score_cmd(self, args):
         board = self.board.get_twoD_board()
 
@@ -52,12 +53,36 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         #And try to see which territory they are
 
         # Create some iterators
-        i, j = 0,0
+            
         
 
         
             
-        self.respond(self.board._flood_fill((0,0)))
+        self.respond(self.floodfill(board, (0,0), []))
 
-    def floodfill(self, args):
-        self.respond()
+
+ 
+
+    def floodfill(self, board, position, closed):
+        closed.append(position)
+        i, j = position
+        color = board[i,j]
+        right, left, top, bottom = 0,0,0,0
+        if color == 0:
+            #only go in 4 directions
+            print(i, j, j > self.board.size-1, self.board.size)
+            if (i, j+1) not in closed and not  j >= self.board.size-1:
+                bottom = self.floodfill(board, (i, j+1), closed)
+            if (i+1, j) not in closed and not i >= self.board.size-1:
+                right  = self.floodfill(board, (i+1, j), closed)
+            if (i-1, j) not in closed and not i <= 0:
+                left = self.floodfill(board, (i-1, j), closed)
+            if (i, j-1) not in closed and not j <= 0:
+                top = self.floodfill(board, (i, j-1), closed)
+        else:
+            return color
+
+        print(right, left, top, bottom)
+        #return (right, left, top, bottom)
+
+
