@@ -57,7 +57,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         
 
         
-            
+        print(board)
         self.respond(self.floodfill(board, (0,0), []))
 
 
@@ -66,23 +66,29 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
     def floodfill(self, board, position, closed):
         closed.append(position)
         i, j = position
+        #print((not 0 < i < self.board.size-1) or (not 0 < j < self.board.size-1))
+        if (not 0 <= i < self.board.size-1) or (not 0 <= j < self.board.size-1):
+            return -1
+        
         color = board[i,j]
         right, left, top, bottom = 0,0,0,0
         if color == 0:
             #only go in 4 directions
-            print(i, j, j > self.board.size-1, self.board.size)
-            if (i, j+1) not in closed and not  j >= self.board.size-1:
-                bottom = self.floodfill(board, (i, j+1), closed)
-            if (i+1, j) not in closed and not i >= self.board.size-1:
-                right  = self.floodfill(board, (i+1, j), closed)
-            if (i-1, j) not in closed and not i <= 0:
-                left = self.floodfill(board, (i-1, j), closed)
-            if (i, j-1) not in closed and not j <= 0:
-                top = self.floodfill(board, (i, j-1), closed)
+            #print(i, j, j > self.board.size-1, self.board.size)
+            if (i, j+1) not in closed:
+                right = self.floodfill(board, (i, j+1), closed)
+            if (i+1, j) not in closed:
+                bottom  = self.floodfill(board, (i+1, j), closed)
+            if (i-1, j) not in closed:
+                top = self.floodfill(board, (i-1, j), closed)
+            if (i, j-1) not in closed:
+                left = self.floodfill(board, (i, j-1), closed)
+            print("RIGHT: {0}, BOTTOM:{1}, LEFT:{2}, TOP: {3}".format(right, bottom, left, top))
+            #return(0)
         else:
             return color
 
         print(right, left, top, bottom)
-        #return (right, left, top, bottom)
+        return (right, left, top, bottom)
 
 
