@@ -54,9 +54,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
 
         # Create some iterators
             
-        
 
-        
         print(board)
         self.respond(self.floodfill(board, (0,0), []))
 
@@ -66,10 +64,14 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
     def floodfill(self, board, position, closed):
         closed.append(position)
         i, j = position
+        
+        black, white = False, False
+        
         #print((not 0 < i < self.board.size-1) or (not 0 < j < self.board.size-1))
         if (not 0 <= i < self.board.size-1) or (not 0 <= j < self.board.size-1):
             return -1
         
+        # A colour of 3 means the whole region is neutral
         color = board[i,j]
         right, left, top, bottom = 0,0,0,0
         if color == 0:
@@ -77,18 +79,42 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
             #print(i, j, j > self.board.size-1, self.board.size)
             if (i, j+1) not in closed:
                 right = self.floodfill(board, (i, j+1), closed)
+                if right == 3: 
+                    color = 3
+                    return color
             if (i+1, j) not in closed:
                 bottom  = self.floodfill(board, (i+1, j), closed)
+                if bottom == 3:
+                    color = 3
+                    return color
             if (i-1, j) not in closed:
                 top = self.floodfill(board, (i-1, j), closed)
+                if top == 3:
+                    color = 3
+                    return color
             if (i, j-1) not in closed:
                 left = self.floodfill(board, (i, j-1), closed)
-            print("RIGHT: {0}, BOTTOM:{1}, LEFT:{2}, TOP: {3}".format(right, bottom, left, top))
+                if left == 3:
+                    color = 3
+                    return color
+            #print("RIGHT: {0}, BOTTOM:{1}, LEFT:{2}, TOP: {3}".format(right, bottom, left, top))
             #return(0)
         else:
+            if top == 1 or bottom == 1 or left == 1 or right == 1:
+                black = True
+            if top == 2 or bottom == 2 or left == 2 or right == 2:
+                white = True
+                
+            if black and white:
+                color = 3
+            elif black:
+                color = 1
+            elif white:
+                color = 2
+            
             return color
 
-        print(right, left, top, bottom)
-        return (right, left, top, bottom)
+        #print(right, left, top, bottom)
+        #return (right, left, top, bottom)
 
 
