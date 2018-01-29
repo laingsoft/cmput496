@@ -53,9 +53,12 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         #And try to see which territory they are
 
         # Create some iterators
-            
-
-        print(board)
+        
+        # Add the komi
+        scores[2] += self.komi
+        
+        #print(board)
+        
         self.respond(self.floodfill(board, (0,0), []))
 
 
