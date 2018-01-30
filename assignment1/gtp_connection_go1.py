@@ -44,7 +44,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         board = self.board.get_twoD_board()
 
         # First we count the number of stones
-        scores = {1:0, 2:0, 0:0}
+        scores = {1:0, 2:0, 0:0, 3:0}
         for row in board:
             for position in row:
                 scores[position] +=1
@@ -59,18 +59,18 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         # floodfill()
         empty_spaces = self.board.get_empty_positions("b")
         new = []
-        print(board)
+        #print(board)
         for i in empty_spaces:
             #newtest.append(self.board._point_to_coord(i))
             tup = self.board._point_to_coord(i)
             new.append((tup[0]-1, tup[1]-1))
-        print(new)
+        #print(new)
         for i in new:
-            self.respond(self.floodfill(board, i, []))
+            scores[self.floodfill(board, i, [])] += 1
         
         # Finally, add the komi
         scores[2] += self.komi
-        
+        self.respond(scores)
         #print(board)
 
     def floodfill(self, board, position, closed):
@@ -80,8 +80,8 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         black, white = False, False
         
         #print((not 0 < i < self.board.size-1) or (not 0 < j < self.board.size-1))
-        if (not 0 <= i < self.board.size-1) or (not 0 <= j < self.board.size-1):
-            return 0
+        if (not 0 <= i < self.board.size) or (not 0 <= j < self.board.size):
+            return -1
         
         # A colour of 3 means the whole region is neutral
         color = board[i,j]
@@ -112,6 +112,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
             #print("RIGHT: {0}, BOTTOM:{1}, LEFT:{2}, TOP: {3} | {4} {5}".format(right, bottom, left, top, i, j))
 
             test = [right, left, bottom, top]
+            #print(test)
             if 1 in test and 2 in test:
                 return 3
             else:
