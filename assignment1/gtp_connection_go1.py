@@ -43,26 +43,28 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
     def score_cmd(self, args):
         board = self.board.get_twoD_board()
 
-        #First we count the number of stones
+        # First we count the number of stones
         scores = {1:0, 2:0, 0:0}
         for row in board:
             for position in row:
                 scores[position] +=1
 
-        #Next we look at all of the open positions
-        #And try to see which territory they are
+        # Next we look at all of the open positions and try to see 
+        # which territory they are
 
         # Create some iterators
         
-        # Add the komi
+        # Find all empty spaces
+        # TODO: use in combination with "closed" to find where next to call
+        # floodfill()
+        empty_spaces = self.board.get_empty_positions("b")
+        
+        self.respond(self.floodfill(board, (0,0), []))
+        
+        # Finally, add the komi
         scores[2] += self.komi
         
         #print(board)
-        
-        self.respond(self.floodfill(board, (0,0), []))
-
-
- 
 
     def floodfill(self, board, position, closed):
         closed.append(position)
@@ -78,7 +80,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         color = board[i,j]
         right, left, top, bottom = 0,0,0,0
         if color == 0:
-            #only go in 4 directions
+            # Only go in four directions
             #print(i, j, j > self.board.size-1, self.board.size)
             if (i, j+1) not in closed:
                 right = self.floodfill(board, (i, j+1), closed)
