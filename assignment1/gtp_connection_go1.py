@@ -70,7 +70,17 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         
         # Finally, add the komi
         scores[2] += self.komi
-        self.respond(scores)
+        
+        # Return the winner in the correct format
+        # 0 indicates a tie as specified
+        if scores[1] > scores[2]:
+            self.respond("B+" + str(scores[1]-scores[2]))
+        elif scores[2] > scores[1]:
+            self.respond("W+" + str(scores[2]-scores[1]))
+        else:
+            self.respond(0)
+        
+        #self.respond(scores)
         #print(board)
 
     def floodfill(self, board, position, closed):
