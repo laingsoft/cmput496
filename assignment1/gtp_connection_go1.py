@@ -141,4 +141,3 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                 color = 2
             
             return color
-        #return 3
