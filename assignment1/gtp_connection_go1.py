@@ -58,13 +58,15 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         # TODO: use in combination with "closed" to find where next to call
         # floodfill()
         empty_spaces = self.board.get_empty_positions("b")
-        test = self.board.get_empty_positions("w")
+        new = []
         print(board)
-        newtest = []
         for i in empty_spaces:
-            newtest.append(self.board._point_to_coord(i))
-            
-        self.respond(self.floodfill(board, (1,1), []))
+            #newtest.append(self.board._point_to_coord(i))
+            tup = self.board._point_to_coord(i)
+            new.append((tup[0]-1, tup[1]-1))
+        print(new)
+        for i in new:
+            self.respond(self.floodfill(board, i, []))
         
         # Finally, add the komi
         scores[2] += self.komi
@@ -79,7 +81,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         
         #print((not 0 < i < self.board.size-1) or (not 0 < j < self.board.size-1))
         if (not 0 <= i < self.board.size-1) or (not 0 <= j < self.board.size-1):
-            return -1
+            return 0
         
         # A colour of 3 means the whole region is neutral
         color = board[i,j]
