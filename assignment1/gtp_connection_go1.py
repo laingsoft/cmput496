@@ -116,7 +116,6 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                     return color
 
             test = [right, left, bottom, top]
-            
             if 1 in test and 2 in test:
                 return 3
             else:
@@ -124,6 +123,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                     return 1
                 if 2 in test:
                     return 2
+            return 0
 
         else:
             
@@ -140,3 +140,4 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                 color = 2
             
             return color
+        #return 3
