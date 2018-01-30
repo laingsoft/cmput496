@@ -55,13 +55,16 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         
         # Find all empty spaces
         empty_spaces = self.board.get_empty_positions("b")
-        new = []
+        
+        # Change the empty space array to be zero-indexed
+        zero_index = []
         
         for i in empty_spaces:
             tup = self.board._point_to_coord(i)
-            new.append((tup[0]-1, tup[1]-1))
+            zero_index.append((tup[0]-1, tup[1]-1))
         
-        for i in new:
+        # Get the scores for the controlled regions
+        for i in zero_index:
             scores[self.floodfill(board, i, [])] += 1
         
         # Finally, add the komi
