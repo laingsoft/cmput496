@@ -58,8 +58,13 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         # TODO: use in combination with "closed" to find where next to call
         # floodfill()
         empty_spaces = self.board.get_empty_positions("b")
-        
-        self.respond(self.floodfill(board, (0,0), []))
+        test = self.board.get_empty_positions("w")
+        print(board)
+        newtest = []
+        for i in empty_spaces:
+            newtest.append(self.board._point_to_coord(i))
+            
+        self.respond(self.floodfill(board, (1,1), []))
         
         # Finally, add the komi
         scores[2] += self.komi
@@ -102,9 +107,21 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                 if left == 3:
                     color = 3
                     return color
-            #print("RIGHT: {0}, BOTTOM:{1}, LEFT:{2}, TOP: {3}".format(right, bottom, left, top))
+            #print("RIGHT: {0}, BOTTOM:{1}, LEFT:{2}, TOP: {3} | {4} {5}".format(right, bottom, left, top, i, j))
+
+            test = [right, left, bottom, top]
+            if 1 in test and 2 in test:
+                return 3
+            else:
+                if 1 in test:
+                    return 1
+                if 2 in test:
+                    return 2
+                
             #return(0)
+            #print(color)
         else:
+            #print(top, bottom, left, right, "point", i, j)
             if top == 1 or bottom == 1 or left == 1 or right == 1:
                 black = True
             if top == 2 or bottom == 2 or left == 2 or right == 2:
@@ -116,8 +133,9 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                 color = 1
             elif white:
                 color = 2
-            
+            #print(color)
             return color
+    
 
         #print(right, left, top, bottom)
         #return (right, left, top, bottom)
