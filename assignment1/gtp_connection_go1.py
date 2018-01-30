@@ -44,6 +44,7 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         board = self.board.get_twoD_board()
 
         # First we count the number of stones
+        # 1 is black, 2 is white, 0 is border and 3 is neutral
         scores = {1:0, 2:0, 0:0, 3:0}
         for row in board:
             for position in row:
@@ -51,20 +52,15 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
 
         # Next we look at all of the open positions and try to see 
         # which territory they are
-
-        # Create some iterators
         
         # Find all empty spaces
-        # TODO: use in combination with "closed" to find where next to call
-        # floodfill()
         empty_spaces = self.board.get_empty_positions("b")
         new = []
-        #print(board)
+        
         for i in empty_spaces:
-            #newtest.append(self.board._point_to_coord(i))
             tup = self.board._point_to_coord(i)
             new.append((tup[0]-1, tup[1]-1))
-        #print(new)
+        
         for i in new:
             scores[self.floodfill(board, i, [])] += 1
         
@@ -79,17 +75,14 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
             self.respond("W+" + str(scores[2]-scores[1]))
         else:
             self.respond(0)
-        
-        #self.respond(scores)
-        #print(board)
+
 
     def floodfill(self, board, position, closed):
         closed.append(position)
         i, j = position
         
         black, white = False, False
-        
-        #print((not 0 < i < self.board.size-1) or (not 0 < j < self.board.size-1))
+
         if (not 0 <= i < self.board.size) or (not 0 <= j < self.board.size):
             return -1
         
@@ -98,7 +91,6 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
         right, left, top, bottom = 0,0,0,0
         if color == 0:
             # Only go in four directions
-            #print(i, j, j > self.board.size-1, self.board.size)
             if (i, j+1) not in closed:
                 right = self.floodfill(board, (i, j+1), closed)
                 if right == 3: 
@@ -119,10 +111,9 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                 if left == 3:
                     color = 3
                     return color
-            #print("RIGHT: {0}, BOTTOM:{1}, LEFT:{2}, TOP: {3} | {4} {5}".format(right, bottom, left, top, i, j))
 
             test = [right, left, bottom, top]
-            #print(test)
+            
             if 1 in test and 2 in test:
                 return 3
             else:
@@ -130,11 +121,9 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                     return 1
                 if 2 in test:
                     return 2
-                
-            #return(0)
-            #print(color)
+
         else:
-            #print(top, bottom, left, right, "point", i, j)
+            
             if top == 1 or bottom == 1 or left == 1 or right == 1:
                 black = True
             if top == 2 or bottom == 2 or left == 2 or right == 2:
@@ -146,11 +135,5 @@ class GtpConnectionGo1(gtp_connection.GtpConnection):
                 color = 1
             elif white:
                 color = 2
-            #print(color)
+            
             return color
-    
-
-        #print(right, left, top, bottom)
-        #return (right, left, top, bottom)
-
-
