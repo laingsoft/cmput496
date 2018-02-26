@@ -62,28 +62,34 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
 
     def negamax(self, node, color, curtime, delta):
         if int(time.time() - curtime) > delta:
-            return node.state.score
+            print("score -- ", node.state.score(self.go_engine.komi))
+            return node.state.score(self.go_engine.komi)[0]
     
         children = GoBoardUtil.generate_legal_moves(node.state, GoBoardUtil.color_to_int(color))
-        print(children.split(" "))
+        best = float("-inf")
         for child in children.split(" "):
+            #print("trying", child)
+            if int(time.time() - curtime) > delta:
+                break
             nodecopy = copy.deepcopy(node)
-            coord = GoBoardUtil.move_to_coord(child, self.board.size)
-            point = self.board._coord_to_point(coord[0], coord[1])
-            print(color)
-            nodecopy.state.move(point, GoBoardUtil.color_to_int(color))
-            print("finally")
-            best = float("-inf")
-            print("best")
+            if child == '':
+                child = None
+                nodecopy.state.move(child, GoBoardUtil.color_to_int(color))
+            else:
+                coord = GoBoardUtil.move_to_coord(child, self.board.size)
+                point = self.board._coord_to_point(coord[0], coord[1])
+                # print(color)
+                # print(coord)
+                nodecopy.state.move(point, GoBoardUtil.color_to_int(color))
             if color == "b":
-                v = self.negamax(nodecopy, "w", time, delta)
+                v = -self.negamax(nodecopy, "w", curtime, delta)
+                #print(v)
                 best = max(best, v)
             else:
-                print("here")
-                v = self.negamax(nodecopy, "b", time, delta)
-                print("run")
+                v = -self.negamax(nodecopy, "b", curtime, delta)
                 best = max(best, v)
-            return best
+        #print("returning")
+        return best
 
     def timelimit(self, args):
         self.timelimit = args
