@@ -60,8 +60,8 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
         except Exception as e:
             self.respond('Error: {}'.format(str(e)))
 
-    def negamax(self, node, color, curtime, delta):
-        if int(time.time() - curtime) > delta:
+    def negamax(self, node, color, curtime, delta, α, β):
+        if (int(time.time() - curtime) > delta) or 
             print("score -- ", node.state.score(self.go_engine.komi))
             return node.state.score(self.go_engine.komi)[0]
     
@@ -82,14 +82,18 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
                 # print(coord)
                 nodecopy.state.move(point, GoBoardUtil.color_to_int(color))
             if color == "b":
-                v = -self.negamax(nodecopy, "w", curtime, delta)
+                v = -self.negamax(nodecopy, "w", curtime, delta, -β, -α) #alpha and beta switch with each negamax call
                 #print(v)
                 best = max(best, v)
             else:
-                v = -self.negamax(nodecopy, "b", curtime, delta)
+                v = -self.negamax(nodecopy, "b", curtime, delta, -β, -α) #alpha and beta switch with each negamax call
                 best = max(best, v)
+            α = max( α, v )                 #alpha-beta
+            if α ≥ β                        #alpha-beta
+                break                       #alpha-beta
         #print("returning")
         return best
+
 
     def timelimit(self, args):
         self.timelimit = args
@@ -98,8 +102,11 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
     def solve(self, args):
         # Create a copy of our current environment as the root of the tree.
         root = node(self.board)
-        self.respond(self.negamax(root, GoBoardUtil.int_to_color(self.board.current_player), time.time(), self.timelimit))
+        α = float("-inf")   #initialized to - infinity
+        β = float("inf")    #initialized to +infinity
+        self.respond(self.negamax(root, GoBoardUtil.int_to_color(self.board.current_player), time.time(), self.timelimit), α, β) #alpha and beta added
         
+
         
         
     
