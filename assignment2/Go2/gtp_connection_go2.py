@@ -20,18 +20,7 @@ class node:
 
         
         
-def negamax(node, color, time, delta):
-    if int(time.time() - time) > delta:
-        return node.score
-    children = GoBoardUtil.generate_legal_moves(node.state, GoBoardUtil.color_to_int(color))
-    for child in children:
-        nodecopy = copy.deepcopy(node)
-        nodecopy.move(color+child)
-        if color == "b":
-            v = negamax(nodecopy, "w", time, delta)
-        else:
-            v = negamax(nodecopy, "b", time, delta)
-        
+
 
 
 class GtpConnectionGo2(gtp_connection.GtpConnection):
@@ -71,12 +60,40 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
         except Exception as e:
             self.respond('Error: {}'.format(str(e)))
 
+    def negamax(self, node, color, curtime, delta):
+        if int(time.time() - curtime) > delta:
+            return node.state.score
+    
+        children = GoBoardUtil.generate_legal_moves(node.state, GoBoardUtil.color_to_int(color))
+        print(children.split(" "))
+        for child in children.split(" "):
+            nodecopy = copy.deepcopy(node)
+            coord = GoBoardUtil.move_to_coord(child, self.board.size)
+            point = self.board._coord_to_point(coord[0], coord[1])
+            print(color)
+            nodecopy.state.move(point, GoBoardUtil.color_to_int(color))
+            print("finally")
+            best = float("-inf")
+            print("best")
+            if color == "b":
+                v = self.negamax(nodecopy, "w", time, delta)
+                best = max(best, v)
+            else:
+                print("here")
+                v = self.negamax(nodecopy, "b", time, delta)
+                print("run")
+                best = max(best, v)
+            return best
+
     def timelimit(self, args):
         self.timelimit = args
+        self.respond("")
 
     def solve(self, args):
         # Create a copy of our current environment as the root of the tree.
         root = node(self.board)
+        self.respond(self.negamax(root, GoBoardUtil.int_to_color(self.board.current_player), time.time(), self.timelimit))
+        
         
         
     
