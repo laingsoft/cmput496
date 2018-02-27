@@ -67,9 +67,12 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
     
         children = GoBoardUtil.generate_legal_moves(node.state, GoBoardUtil.color_to_int(color))
         best = float("-inf")
-        for child in children.split(" "):
-            #print("trying", child)
+        children = children.split(" ")
+        children.append("")
+        for child in children:
+           # print("trying", child, int(time.time() - curtime), delta)
             if int(time.time() - curtime) > delta:
+                #print("exiting")
                 break
             nodecopy = copy.deepcopy(node)
             if child == '':
@@ -81,6 +84,7 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
                 # print(color)
                 # print(coord)
                 nodecopy.state.move(point, GoBoardUtil.color_to_int(color))
+            
             if color == "b":
                 v = -self.negamax(nodecopy, "w", curtime, delta)
                 #print(v)
@@ -92,7 +96,7 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
         return best
 
     def timelimit(self, args):
-        self.timelimit = args
+        self.timelimit = int(args[0])
         self.respond("")
 
     def solve(self, args):
