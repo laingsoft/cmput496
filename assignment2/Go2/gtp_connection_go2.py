@@ -19,10 +19,6 @@ class node:
         self.state = state
 
         
-        
-
-
-
 class GtpConnectionGo2(gtp_connection.GtpConnection):
 
     def __init__(self, go_engine, board, outfile = 'gtp_log', debug_mode = False):
@@ -62,24 +58,24 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
 
     def negamax(self, node, color, curtime, delta):
         if int(time.time() - curtime) > delta:
-            print("score -- ", node.state.score(self.go_engine.komi))
-            #return node.state.score(self.go_engine.komi)[0]
-            return "unk"
+            #print("score -- ", node.state.score(self.go_engine.komi))
+            return node.state.score(self.go_engine.komi)[0]
+            #return "unk"
     
         children = GoBoardUtil.generate_legal_moves(node.state, GoBoardUtil.color_to_int(color))
         best = float("-inf")
         children = children.split(" ")
-        children.append('')
+        #children.append('')
         #print(children)
         for child in children:
             if int(time.time() - curtime) > delta:
-                break
+                return node.state.score(self.go_engine.komi)[0]
             
             nodecopy = copy.deepcopy(node)
             
             if child == '':
-                print(child, child == '', children)
-                print(nodecopy.state.end_of_game())
+               # print(child, child == '', children)
+                #print(nodecopy.state.end_of_game())
                 child = None
                 nodecopy.state.move(child, GoBoardUtil.color_to_int(color))
             else:
@@ -110,7 +106,12 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
     def solve(self, args):
         # Create a copy of our current environment as the root of the tree.
         root = node(self.board)
-        self.respond(self.negamax(root, GoBoardUtil.int_to_color(self.board.current_player), time.time(), self.timelimit))
+        negamaxResult = GoBoardUtil.int_to_color(self.negamax(root,
+                                                              GoBoardUtil.int_to_color(self.board.current_player),
+                                                              time.time(),
+                                                              self.timelimit
+        ))
+        self.respond("{0} {1}".format(negamaxResult, ""))
         
         
         
