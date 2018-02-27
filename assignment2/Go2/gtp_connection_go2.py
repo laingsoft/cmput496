@@ -63,34 +63,42 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
     def negamax(self, node, color, curtime, delta):
         if int(time.time() - curtime) > delta:
             print("score -- ", node.state.score(self.go_engine.komi))
-            return node.state.score(self.go_engine.komi)[0]
+            #return node.state.score(self.go_engine.komi)[0]
+            return "unk"
     
         children = GoBoardUtil.generate_legal_moves(node.state, GoBoardUtil.color_to_int(color))
         best = float("-inf")
         children = children.split(" ")
-        children.append("")
+        children.append('')
+        #print(children)
         for child in children:
-           # print("trying", child, int(time.time() - curtime), delta)
             if int(time.time() - curtime) > delta:
-                #print("exiting")
                 break
+            
             nodecopy = copy.deepcopy(node)
+            
             if child == '':
+                print(child, child == '', children)
+                print(nodecopy.state.end_of_game())
                 child = None
                 nodecopy.state.move(child, GoBoardUtil.color_to_int(color))
             else:
                 coord = GoBoardUtil.move_to_coord(child, self.board.size)
                 point = self.board._coord_to_point(coord[0], coord[1])
-                # print(color)
-                # print(coord)
-                nodecopy.state.move(point, GoBoardUtil.color_to_int(color))
+                val = nodecopy.state.move(point, GoBoardUtil.color_to_int(color))
+
+            #print(self.board.end_of_game())
+            if nodecopy.state.end_of_game():
+                
+                #return color
+                return node.state.score(self.go_engine.komi)[0]
             
             if color == "b":
-                v = -self.negamax(nodecopy, "w", curtime, delta)
+                v = self.negamax(nodecopy, "w", curtime, delta)
                 #print(v)
                 best = max(best, v)
             else:
-                v = -self.negamax(nodecopy, "b", curtime, delta)
+                v = self.negamax(nodecopy, "b", curtime, delta)
                 best = max(best, v)
         #print("returning")
         return best
