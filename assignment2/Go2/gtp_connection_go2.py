@@ -56,48 +56,50 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
         except Exception as e:
             self.respond('Error: {}'.format(str(e)))
 
-    def negamax(self, node, color, curtime, delta):
-        if int(time.time() - curtime) > delta:
-            #print("score -- ", node.state.score(self.go_engine.komi))
-            return node.state.score(self.go_engine.komi)[0]
-            #return "unk"
-    
-        children = GoBoardUtil.generate_legal_moves(node.state, GoBoardUtil.color_to_int(color))
+    def negamax(self, pnode, color, curtime, delta):
+        #if int(time.time() - curtime) > delta:
+            #If the timelimit is passed, just return the heuristic value of the move
+        #    return pnode.state.score(self.go_engine.komi)[0]
+
+        #Generate all of the children of the current node
+        children = GoBoardUtil.generate_legal_moves(pnode.state, GoBoardUtil.color_to_int(color))
+        #Which value is the best? I dunno?
         best = float("-inf")
+        #Children list comes out as a string for some reason.
         children = children.split(" ")
-        #children.append('')
-        #print(children)
+
+        #Go through the children
         for child in children:
+            #If the time is expired, return the score and the child
             if int(time.time() - curtime) > delta:
-                return node.state.score(self.go_engine.komi)[0]
+                return pnode.state.score(self.go_engine.komi), child
             
-            nodecopy = copy.deepcopy(node)
             
+            nodecopy = node(pnode.state.copy())
             if child == '':
-               # print(child, child == '', children)
-                #print(nodecopy.state.end_of_game())
                 child = None
-                nodecopy.state.move(child, GoBoardUtil.color_to_int(color))
+                val = nodecopy.state.move(child, GoBoardUtil.color_to_int(color))
+                print("passed", val, nodecopy.state.end_of_game())
             else:
                 coord = GoBoardUtil.move_to_coord(child, self.board.size)
                 point = self.board._coord_to_point(coord[0], coord[1])
                 val = nodecopy.state.move(point, GoBoardUtil.color_to_int(color))
+                #print("didn't pass", val)
 
-            #print(self.board.end_of_game())
+           # print(nodecopy.state.num_pass, child)
             if nodecopy.state.end_of_game():
-                
-                #return color
-                return node.state.score(self.go_engine.komi)[0]
+                #print("baspringo", child)
+                return pnode.state.score(self.go_engine.komi)[1]
             
             if color == "b":
-                v = self.negamax(nodecopy, "w", curtime, delta)
+                v = -self.negamax(nodecopy, "w", curtime, delta)[0][1]
                 #print(v)
                 best = max(best, v)
             else:
-                v = self.negamax(nodecopy, "b", curtime, delta)
+                v = -self.negamax(nodecopy, "b", curtime, delta)[0][1]
                 best = max(best, v)
         #print("returning")
-        return best
+        return (0,best), child
 
     def timelimit(self, args):
         self.timelimit = int(args[0])
@@ -106,11 +108,12 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
     def solve(self, args):
         # Create a copy of our current environment as the root of the tree.
         root = node(self.board)
-        negamaxResult = GoBoardUtil.int_to_color(self.negamax(root,
+        negamaxResult = self.negamax(root,
                                                               GoBoardUtil.int_to_color(self.board.current_player),
                                                               time.time(),
                                                               self.timelimit
-        ))
+        )
+        #print(negamaxResult[1].state.moves)
         self.respond("{0} {1}".format(negamaxResult, ""))
         
         
