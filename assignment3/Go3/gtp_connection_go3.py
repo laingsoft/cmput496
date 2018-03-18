@@ -90,12 +90,8 @@ class GtpConnection(gtp_connection.GtpConnection):
                     print("do", run_away_point, self.board.current_player)
                     run_moves.append(run_away_point)
         
-                
-
-        
-        #Run away / play on the last liberty. only makes sense if there is more than 1 liberty after this
-
-        #capture - getting liberties by capturing stones
-
-        return None
+        if not len(run_moves):
+            return None
+        else:
+            return run_moves
 
