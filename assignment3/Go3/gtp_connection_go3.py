@@ -29,7 +29,7 @@ class GtpConnection(gtp_connection.GtpConnection):
             SIZExSIZE array representing the current board state
         """
         gtp_connection.GtpConnection.__init__(self, go_engine, board, outfile, debug_mode)
-
+        self.commands["dtest"] = self.atari_defense
     
     def policy_moves_cmd(self, args):
 
@@ -47,11 +47,24 @@ class GtpConnection(gtp_connection.GtpConnection):
         return None
 
 
-    def atari_defense(self):
-        last_move = board.last_move
+    def atari_defense(self, args):
+        last_move = self.board.last_move
         if last_move == None:
             return None
+        S, E, S_eyes = self.board.find_S_and_E(BLACK)
+        #safety = self.board.find_safety(BLACK)
+        for i in S:
+            if self.board._liberty(i, BLACK) == 1:
+                #If there is only one liberty, defend it
+                run_away_point = self.board._single_liberty(i, BLACK)
+                bcopy = self.board.copy()
+                bcopy.move(run_away_point, BLACK)
+                if bcopy._liberty(run_away_point, BLACK) > 1:
+                    print("do", run_away_point)
+                    return run_away_point
+                
 
+        
         #Run away / play on the last liberty. only makes sense if there is more than 1 liberty after this
 
         #capture - getting liberties by capturing stones
