@@ -1,3 +1,4 @@
+
 """
 Module for playing games of Go using GoTextProtocol
 
@@ -56,3 +57,4 @@ class GtpConnection(gtp_connection.GtpConnection):
         #capture - getting liberties by capturing stones
 
         return None
+
