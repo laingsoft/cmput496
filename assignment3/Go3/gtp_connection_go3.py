@@ -54,6 +54,8 @@ class GtpConnection(gtp_connection.GtpConnection):
     def atari_capture(self):
         #capture the last move if:
         last_move = self.board.last_move
+        if last_move == None:
+            return None
         opponent = GoBoardUtil.opponent(self.board.current_player)
         x, y = GoBoardUtil.point_to_coord(last_move, self.board.NS)
         
