@@ -89,7 +89,6 @@ class GtpConnection(gtp_connection.GtpConnection):
                 bcopy = self.board.copy()
                 bcopy.move(run_away_point, self.board.current_player)
                 if bcopy._liberty(run_away_point, self.board.current_player) > 1:
-                    print("do", run_away_point, self.board.current_player)
                     run_moves.append(run_away_point)
         
         if not len(run_moves):
