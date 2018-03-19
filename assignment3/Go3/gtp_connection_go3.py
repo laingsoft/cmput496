@@ -77,10 +77,10 @@ class GtpConnection(gtp_connection.GtpConnection):
 
     def atari_defense(self):
         last_move = self.board.last_move
+        opponent = GoBoardUtil.opponent(self.board.current_player)
         if last_move == None:
             return None
         S, E, S_eyes = self.board.find_S_and_E(self.board.current_player)
-        #safety = self.board.find_safety(BLACK)
         run_moves = []
         for i in S:
             if self.board._liberty(i, self.board.current_player) == 1:
@@ -90,7 +90,15 @@ class GtpConnection(gtp_connection.GtpConnection):
                 bcopy.move(run_away_point, self.board.current_player)
                 if bcopy._liberty(run_away_point, self.board.current_player) > 1:
                     run_moves.append(run_away_point)
-        
+                #next check if capturing any of the opponents stones would increase the liberty
+                sprime, ep, s_prime_eyes = self.board.find_S_and_E(opponent)
+                for y in sprime:
+                    capture_point = self.board._single_liberty(y, opponent)
+                    bcopy = self.board.copy()
+                    bcopy.move(capture_point, self.board.current_player)
+                    if(bcopy._liberty(i, self.board.current_player) > 1):      
+                        run_moves.append(capture_point)
+                        
         if not len(run_moves):
             return None
         else:
