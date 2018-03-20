@@ -77,14 +77,20 @@ class GtpConnection(gtp_connection.GtpConnection):
 
     def atari_defense(self):
         last_move = self.board.last_move
-        opponent = GoBoardUtil.opponent(self.board.current_player)
         if last_move == None:
             return None
+  
+        before_last_move = self.board.copy()
+        before_last_move.undo_move()
+        opponent = GoBoardUtil.opponent(self.board.current_player)
+
         S, E, S_eyes = self.board.find_S_and_E(self.board.current_player)
         run_moves = []
         for i in S:
-            if self.board._liberty(i, self.board.current_player) == 1:
+            if self.board._liberty(i, self.board.current_player) == 1 and before_last_move._liberty(i, self.board.current_player) != 1:
                 #If there is only one liberty, defend it
+                #Check if it was only the last move
+                
                 run_away_point = self.board._single_liberty(i, self.board.current_player)
                 bcopy = self.board.copy()
                 bcopy.move(run_away_point, self.board.current_player)
