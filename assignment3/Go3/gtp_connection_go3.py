@@ -63,8 +63,9 @@ class GtpConnection(gtp_connection.GtpConnection):
             capture_point = self.board._single_liberty(last_move, opponent)
             bcopy = self.board.copy()
             legal = bcopy.move(capture_point, self.board.current_player)
-            if legal:
-                return [capture_point]
+            filtered_moves = GoBoardUtil.filter_moves(self.board,[capture_point], self.go_engine.check_selfatari)
+            if legal and  len(filtered_moves):
+                return filtered_moves
         
         
         #1 - It only has one liberty left
@@ -104,8 +105,9 @@ class GtpConnection(gtp_connection.GtpConnection):
                     bcopy.move(capture_point, self.board.current_player)
                     if(bcopy._liberty(i, self.board.current_player) > 1):      
                         run_moves.append(capture_point)
-                        
-        if not len(run_moves):
+
+        filtered_moves = GoBoardUtil.filter_moves(self.board,run_moves, self.go_engine.check_selfatari)
+        if not len(filtered_moves):
             return None
         else:
             return run_moves
