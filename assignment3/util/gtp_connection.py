@@ -425,6 +425,7 @@ class GtpConnection():
         """
         Return list of policy moves for the current_player of the board
         """
+
         policy_moves, type_of_move = GoBoardUtil.generate_all_policy_moves(self.board,
                                                         self.go_engine.use_pattern,
                                                         self.go_engine.check_selfatari)
