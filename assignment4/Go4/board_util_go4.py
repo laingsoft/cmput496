@@ -6,6 +6,7 @@ by Isaac Henrion and Aamos Storkey at the University of Edinburgh.
 """
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, FLOODFILL
 import numpy as np
+from feature import Features_weight
 
 class GoBoardUtilGo4(GoBoardUtil):
 
