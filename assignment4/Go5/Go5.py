@@ -5,7 +5,7 @@ sys.path.append(utilpath)
 utilpath = sys.path[0] + "/../Go4/"
 sys.path.append(utilpath)
 
-from gtp_connection import GtpConnection  
+from gtp_connection_go5 import GtpConnection
 from board_util_go4 import GoBoardUtilGo4
 from simple_board import SimpleGoBoard
 from mcts import MCTS
