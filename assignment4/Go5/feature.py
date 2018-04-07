@@ -41,7 +41,7 @@ sys.path.insert(0,os.path.__file__)
 dirpath = os.path.dirname(os.path.realpath(__file__))
 filepath=os.path.join(dirpath,"features_weight.dat")
 if os.path.isfile(filepath):
-    sys.stderr.write("Load Features_weight from features_weight.dat ...")
+    #sys.stderr.write("Load Features_weight from features_weight.dat ...")
     data = np.loadtxt(filepath)
     Features_weight = np.ones(len(data))
     for i in range(len(Features_weight)):
