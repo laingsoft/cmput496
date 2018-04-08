@@ -45,11 +45,14 @@ class GtpConnection(gtp_connection.GtpConnection):
                 moves.append(move)
                 probs[move] = Feature.compute_move_gamma(Features_weight, all_board_features[move])
                 gamma_sum += probs[move]
+                
+        
+        
         if len(moves) != 0:
             assert gamma_sum != 0.0
             for m in moves:
                 probs[m] = probs[m] / gamma_sum
-                
+ 
         best_move = np.argmax(probs)
         best_move_prob = probs[best_move]
         
