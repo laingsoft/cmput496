@@ -15,6 +15,17 @@ import re
 from feature import Features_weight
 from feature import Feature
 
+class sim:
+    def __init__(self, move,prob, best_move_prob, strength):
+        self.move = move
+        self.sim = int(round((prob / best_move_prob) * strength))
+        self.winrate = (((prob / best_move_prob)+1) * 0.5)
+        self.wins = int(round(round(self.winrate,1)*self.sim))
+        
+    def __lt__(self, other):
+        return self.winrate < other.winrate
+        
+
 class GtpConnection(gtp_connection.GtpConnection):
 
     def __init__(self, go_engine, board, outfile = 'gtp_log', debug_mode = False):
@@ -38,5 +49,19 @@ class GtpConnection(gtp_connection.GtpConnection):
             assert gamma_sum != 0.0
             for m in moves:
                 probs[m] = probs[m] / gamma_sum
-        print(GoBoardUtil.sorted_point_string([np.argmax(probs)], self.board.NS))
+                
+        best_move = np.argmax(probs)
+        best_move_prob = probs[best_move]
+        
+        result = []
+        for i in moves:
+            result.append(sim(i, probs[i], best_move_prob, 10))
+            
+        result.sort(reverse = True)
+        
+        response = ""
+        for i in result:
+            response += str(GoBoardUtil.sorted_point_string([i.move], self.board.NS)) + " " + str(i.wins)+ " " + str(i.sim) + " "
+        
+        self.respond(response)
         
