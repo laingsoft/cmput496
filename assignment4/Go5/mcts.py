@@ -8,6 +8,10 @@ import random
 from board_util_go4 import GoBoardUtilGo4, BLACK, WHITE
 PASS = 'pass'
 
+from gtp_connection_go5 import sim
+from feature import Feature
+from feature import Features_weight
+
 def uct_val(node, child, exploration, max_flag): 
     if child._n_visits == 0:
         return float("inf")
@@ -37,12 +41,37 @@ class TreeNode(object):
         """
         Expands tree by creating new children.
         """
+        moves = []
+        gamma_sum = 0.0
+        empty_points = board.get_empty_points()
+        color = board.current_player
+        probs = np.zeros(board.maxpoint)
+        all_board_features = Feature.find_all_features(board)
+        for move in empty_points:
+            if board.check_legal(move, color) and not board.is_eye(move, color):
+                moves.append(move)
+                probs[move] = Feature.compute_move_gamma(Features_weight, all_board_features[move])
+                gamma_sum += probs[move]
+        if len(moves) != 0:
+            assert gamma_sum != 0.0
+            for m in moves:
+                probs[m] = probs[m] / gamma_sum
+                
+        best_move = np.argmax(probs)
+        best_move_prob = probs[best_move]
+        
         moves = board.get_empty_points()
         for move in moves:
             if move not in self._children:
                 if board.check_legal(move, color) and not board.is_eye(move, color):
                     self._children[move] = TreeNode(self)
                     self._children[move]._move = move
+                    
+                    x = sim(move, probs[move], best_move_prob, 10)
+                    
+                    self._children[move]._black_wins = x.wins
+                    self._children[move]._n_visits = x.sim
+                    
         self._children[PASS] = TreeNode(self)
         self._children[PASS]._move = PASS
         self._expanded = True
