@@ -71,6 +71,8 @@ class TreeNode(object):
                     
                     self._children[move]._black_wins = x.wins
                     self._children[move]._n_visits = x.sim
+                    self._root._black_wins += x.wins
+                    self._root._n_visits = x.sim
                     
         self._children[PASS] = TreeNode(self)
         self._children[PASS]._move = PASS
