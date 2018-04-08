@@ -39,22 +39,27 @@ class GtpConnection(gtp_connection.GtpConnection):
         gamma_sum = 0.0
         empty_points = self.board.get_empty_points()
         color = self.board.current_player
-        probs = np.zeros(self.board.maxpoint)
+        #probs = np.zeros(self.board.maxpoint)
+        probs = {}
         all_board_features = Feature.find_all_features(self.board)
+        
         for move in empty_points:
             if self.board.check_legal(move, color) and not self.board.is_eye(move, color):
                 moves.append(move)
                 probs[move] = Feature.compute_move_gamma(Features_weight, all_board_features[move])
                 gamma_sum += probs[move]
                 
-        
+        #passing is always allowed, add it
+        moves.append("PASS")
+        probs["PASS"] = Feature.compute_move_gamma(Features_weight, all_board_features["PASS"])
+        gamma_sum += probs["PASS"]
         
         if len(moves) != 0:
             assert gamma_sum != 0.0
             for m in moves:
                 probs[m] = probs[m] / gamma_sum
  
-        best_move = np.argmax(probs)
+        best_move = max(probs.items(), key = lambda x: x[1])[0]
         best_move_prob = probs[best_move]
         
         result = []
@@ -65,7 +70,10 @@ class GtpConnection(gtp_connection.GtpConnection):
         
         response = ""
         for i in result:
-            response += str(GoBoardUtil.sorted_point_string([i.move], self.board.NS)) + " " + str(i.wins)+ " " + str(i.sim) + " "
+            if i.move == "PASS":
+                response += "Pass " + str(i.wins)+ " " + str(i.sim) + " "
+            else:
+                response += str(GoBoardUtil.sorted_point_string([i.move], self.board.NS)) + " " + str(i.wins)+ " " + str(i.sim) + " "
         
         self.respond(response)
         
