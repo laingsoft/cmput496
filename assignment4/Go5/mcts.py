@@ -38,6 +38,7 @@ class TreeNode(object):
         self._black_wins = 0
         self._expanded = False
         self._move = None
+        self._use_knowledge = False 
 
     def expand(self, board, color):
         """
@@ -52,34 +53,41 @@ class TreeNode(object):
                 if board.check_legal(move, color) and not board.is_eye(move, color):
                     self._children[move] = TreeNode(self)
                     self._children[move]._move = move
+                    
+                    #Tell it to use knowledge. default to not
+                    self._children[move]._use_knowledge = self._use_knowledge
+                    
                     #Compute the probability for each child move
-                    probs[move] = Feature.compute_move_gamma(Features_weight, all_board_features[move])
-                    gamma_sum += probs[move]
+                    if self._use_knowledge == "probabilistic":
+                        probs[move] = Feature.compute_move_gamma(Features_weight, all_board_features[move])
+                        gamma_sum += probs[move]    
         #passing is always allowed
         self._children[PASS] = TreeNode(self)
         self._children[PASS]._move = PASS
-        moves.append(PASS)
-        probs[PASS] = Feature.compute_move_gamma(Features_weight, all_board_features["PASS"])
-        gamma_sum += probs[PASS]
         
-        #Normalize
-        if len(moves) != 0:
-            assert gamma_sum != 0.0
-            for m in moves:
-                probs[m] = probs[m] / gamma_sum
-                
-        best_move = max(probs.items(), key = lambda x: x[1])[0]
-        best_move_prob = probs[best_move]
-        
-        b_win_sum, n_visit_sum = 0,0
-        for move in moves:
-            childSim = sim(move, probs[move], best_move_prob, 10)
-            self._children[move]._black_wins = childSim.wins
-            b_win_sum += childSim.wins
-            self._children[move]._n_visits = childSim.sim
-            n_visit_sum += childSim.sim
-         
+        if self._use_knowledge == "probabilistic":
+            moves.append(PASS)
+            probs[PASS] = Feature.compute_move_gamma(Features_weight, all_board_features["PASS"])
+            gamma_sum += probs[PASS]
+            
+            #Normalize
+            if len(moves) != 0:
+                assert gamma_sum != 0.0
+                for m in moves:
+                    probs[m] = probs[m] / gamma_sum
                     
+            best_move = max(probs.items(), key = lambda x: x[1])[0]
+            best_move_prob = probs[best_move]
+            
+            b_win_sum, n_visit_sum = 0,0
+            for move in moves:
+                childSim = sim(move, probs[move], best_move_prob, 10)
+                self._children[move]._black_wins = childSim.wins
+                b_win_sum += childSim.wins
+                self._children[move]._n_visits = childSim.sim
+                n_visit_sum += childSim.sim
+             
+                        
         #self._black_wins += b_win_sum
         #self._n_visits += n_visit_sum
         
@@ -150,10 +158,19 @@ class MCTS(object):
         Returns:
         None
         """
-        node = self._root 
+        node = self._root
+        node._use_knowledge = self.in_tree_knowledge
         # This will be True only once for the root
         if not node._expanded:
             node.expand(board, color)
+            #Avoid the division by zero errors
+            b_wins_sum, n_visit_sum = 0,0
+            for child in node._children.values():
+                b_wins_sum += child._black_wins
+                n_visit_sum += child._n_visits
+                
+            node._black_wins = b_wins_sum
+            node._n_visits = n_visit_sum
         while not node.is_leaf():
             # Greedily select next move.                
             max_flag = color == BLACK
