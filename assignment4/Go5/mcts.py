@@ -43,42 +43,46 @@ class TreeNode(object):
         """
         Expands tree by creating new children.
         """
-        moves = []
-        gamma_sum = 0.0
-        empty_points = board.get_empty_points()
-        color = board.current_player
-        probs = np.zeros(board.maxpoint)
-        all_board_features = Feature.find_all_features(board)
-        for move in empty_points:
-            if board.check_legal(move, color) and not board.is_eye(move, color):
-                moves.append(move)
-                probs[move] = Feature.compute_move_gamma(Features_weight, all_board_features[move])
-                gamma_sum += probs[move]
-        if len(moves) != 0:
-            assert gamma_sum != 0.0
-            for m in moves:
-                probs[m] = probs[m] / gamma_sum
-                
-        best_move = np.argmax(probs)
-        best_move_prob = probs[best_move]
-        
         moves = board.get_empty_points()
-
+        probs = {}
+        gamma_sum = 0.0
+        all_board_features = Feature.find_all_features(board)
         for move in moves:
             if move not in self._children:
                 if board.check_legal(move, color) and not board.is_eye(move, color):
                     self._children[move] = TreeNode(self)
                     self._children[move]._move = move
-                    
-                    x = sim(move, probs[move], best_move_prob, 10)
-                    
-                    self._children[move]._black_wins = x.wins
-                    self._children[move]._n_visits = x.sim
-                    self._root._black_wins += x.wins
-                    self._root._n_visits = x.sim
-                    
+                    #Compute the probability for each child move
+                    probs[move] = Feature.compute_move_gamma(Features_weight, all_board_features[move])
+                    gamma_sum += probs[move]
+        #passing is always allowed
         self._children[PASS] = TreeNode(self)
         self._children[PASS]._move = PASS
+        moves.append(PASS)
+        probs[PASS] = Feature.compute_move_gamma(Features_weight, all_board_features["PASS"])
+        gamma_sum += probs[PASS]
+        
+        #Normalize
+        if len(moves) != 0:
+            assert gamma_sum != 0.0
+            for m in moves:
+                probs[m] = probs[m] / gamma_sum
+                
+        best_move = max(probs.items(), key = lambda x: x[1])[0]
+        best_move_prob = probs[best_move]
+        
+        b_win_sum, n_visit_sum = 0,0
+        for move in moves:
+            childSim = sim(move, probs[move], best_move_prob, 10)
+            self._children[move]._black_wins = childSim.wins
+            b_win_sum += childSim.wins
+            self._children[move]._n_visits = childSim.sim
+            n_visit_sum += childSim.sim
+         
+                    
+        #self._black_wins += b_win_sum
+        #self._n_visits += n_visit_sum
+        
         self._expanded = True
 
     def select(self, exploration, max_flag):
