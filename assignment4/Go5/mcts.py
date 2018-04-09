@@ -163,14 +163,16 @@ class MCTS(object):
         # This will be True only once for the root
         if not node._expanded:
             node.expand(board, color)
+            
             #Avoid the division by zero errors
-            b_wins_sum, n_visit_sum = 0,0
-            for child in node._children.values():
-                b_wins_sum += child._black_wins
-                n_visit_sum += child._n_visits
-                
-            node._black_wins = b_wins_sum
-            node._n_visits = n_visit_sum
+            if self.in_tree_knowledge == "probabilistic":
+                b_wins_sum, n_visit_sum = 0,0
+                for child in node._children.values():
+                    b_wins_sum += child._black_wins
+                    n_visit_sum += child._n_visits
+                    
+                node._black_wins = b_wins_sum
+                node._n_visits = n_visit_sum
         while not node.is_leaf():
             # Greedily select next move.                
             max_flag = color == BLACK
