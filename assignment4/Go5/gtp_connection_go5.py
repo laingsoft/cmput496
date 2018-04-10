@@ -24,6 +24,13 @@ class sim:
         
     def __lt__(self, other):
         return self.winrate < other.winrate
+    
+    def move(self):
+        return str(self.move)
+    def winrate(self):
+        return self.winrate
+    def __repr__(self):
+        return (str(self.move) + str(self.winrate))
         
 
 class GtpConnection(gtp_connection.GtpConnection):
@@ -62,17 +69,22 @@ class GtpConnection(gtp_connection.GtpConnection):
         
         result = []
         for i in moves:
-            result.append(sim(i, probs[i], best_move_prob, 10))
+            if i == "PASS":
+                result.append(sim(i, probs[i], best_move_prob, 10))
+            else:
+                result.append(sim(GoBoardUtil.sorted_point_string([i], self.board.NS), probs[i], best_move_prob, 10))
             
-        result.sort(reverse = True)
+        result.sort(key=sim.move)
+        result.sort(reverse = True, key=sim.winrate)
         
         response = ""
         for i in result:
             if i.move == "PASS":
-                response += "Pass " + str(i.wins)+ " " + str(i.sim) + " "
+                response += "Pass " + str(i.wins)+ " " + str(i.sim)+ " "
             else:
-                response += str(GoBoardUtil.sorted_point_string([i.move], self.board.NS)) + " " + str(i.wins)+ " " + str(i.sim) + " "
+                
+                response += i.move + " " + str(i.wins)+ " " + str(i.sim)+ " "
         
-        self.respond(response)
+        self.respond(response[:-1])
         
     
