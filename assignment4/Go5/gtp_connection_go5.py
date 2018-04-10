@@ -19,8 +19,8 @@ class sim:
     def __init__(self, move,prob, best_move_prob, strength):
         self.move = move
         self.sim = int(round((prob / best_move_prob) * strength))
-        self.winrate = (((prob / best_move_prob)+1) * 0.5)
-        self.wins = int(round(round(self.winrate,1)*self.sim))
+        self.winrate = ((1-(prob / best_move_prob)) * 0.5) + (prob / best_move_prob) 
+        self.wins = int(round(self.winrate*((prob / best_move_prob) * strength)))
         
     def __lt__(self, other):
         return self.winrate < other.winrate
@@ -82,7 +82,6 @@ class GtpConnection(gtp_connection.GtpConnection):
             if i.move == "PASS":
                 response += "Pass " + str(i.wins)+ " " + str(i.sim)+ " "
             else:
-                
                 response += i.move + " " + str(i.wins)+ " " + str(i.sim)+ " "
         
         self.respond(response[:-1])
