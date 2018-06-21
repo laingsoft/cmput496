@@ -56,7 +56,7 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
         except Exception as e:
             self.respond('Error: {}'.format(str(e)))
 
-    def negamax(self, pnode, color, curtime, delta):
+    def negamax(self, pnode, color, curtime, delta, α, β):
         if int(time.time() - curtime) > delta:
             #If the timelimit is passed, just return the heuristic value of the move
             return pnode.state.score(self.go_engine.komi)
@@ -88,11 +88,13 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
                 return pnode.state.score(self.go_engine.komi)
             
             if color == "b":
-                moved, score = self.negamax(nodecopy, "w", curtime, delta)
+                moved, score = self.negamax(nodecopy, "w", curtime, delta, -β, -α)
             
             else:
-                moved, score = self.negamax(nodecopy, "b", curtime, delta)
-
+                moved, score = self.negamax(nodecopy, "b", curtime, delta, -β, -α)
+            α = max( α, v )                 #alpha-beta
+            if α ≥ β                        #alpha-beta
+                break                       #alpha-beta
             #best = max(best, score)
             if(best < -score):
                 best = -score
@@ -113,10 +115,14 @@ class GtpConnectionGo2(gtp_connection.GtpConnection):
     def solve(self, args):
         # Create a copy of our current environment as the root of the tree.
         root = node(self.board)
+        α = float("-inf")   #initialized to - infinity
+        β = float("inf")    #initialized to +infinity
         negamaxResult = self.negamax(root,
                                                               GoBoardUtil.int_to_color(self.board.current_player),
                                                               time.time(),
-                                                              self.timelimit
+                                                              self.timelimit,
+                                                              α,
+                                                              β
         )
         #print(negamaxResult)
         self.respond("{0} {1}".format(GoBoardUtil.int_to_color(negamaxResult[0]), ""))
